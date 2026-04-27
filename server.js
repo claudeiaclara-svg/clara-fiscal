@@ -4,19 +4,12 @@ const path = require("path");
 const app = express();
 app.use(express.json());
 
-// Rota de teste
-app.get("/teste", (req, res) => {
-  res.json({ status: "funcionando!" });
-});
-
-// API
-app.post("/.netlify/functions/claude", async (req, res) => {
+app.post("/api/claude", async (req, res) => {
   try {
     const apiKey = process.env.ANTHROPIC_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: "ANTHROPIC_KEY não configurada" });
     }
-
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -26,16 +19,13 @@ app.post("/.netlify/functions/claude", async (req, res) => {
       },
       body: JSON.stringify(req.body),
     });
-
     const data = await response.json();
     res.status(response.status).json(data);
   } catch (err) {
-    console.error("Erro:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// STATIC
 app.use(express.static(__dirname));
 
 app.get("*", (req, res) => {

@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLARA — Assistente Fiscal · Clara Associados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1D9E75;--green-light:#E1F5EE;--green-mid:#9FE1CB;--green-dark:#085041;--green-hover:#0F6E56;
+  --amber:#FAEEDA;--amber-mid:#FAC775;--amber-dark:#854F0B;--amber-border:#EF9F27;
+  --red-bg:#FCEBEB;--red:#A32D2D;--red-border:#E24B4A;
+  --blue-bg:#E6F1FB;--blue:#185FA5;
+  --bg:#F7F6F2;--card:#FFFFFF;--border:#E8E6DF;--border2:#D3D1C7;
+  --text:#1A1A18;--text2:#5F5E5A;--text3:#888780;
+  --radius:12px;--radius-sm:8px;--shadow:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.04);
+}
+html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);font-size:15px}
+
+/* LAYOUT GERAL */
+.screen{display:none;width:100%;min-height:100vh}
+.screen.active{display:flex;flex-direction:column}
+
+/* ===================== LOGIN ===================== */
+.login-page{align-items:center;justify-content:center;padding:2rem;background:var(--bg)}
+.login-page::before{content:'';position:fixed;top:-80px;right:-80px;width:320px;height:320px;border-radius:50%;background:var(--green-light);opacity:0.6;pointer-events:none}
+.login-page::after{content:'';position:fixed;bottom:-60px;left:-60px;width:200px;height:200px;border-radius:50%;background:var(--amber);opacity:0.5;pointer-events:none}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem 2rem;width:100%;max-width:380px;display:flex;flex-direction:column;align-items:center;gap:1.25rem;box-shadow:var(--shadow);position:relative;z-index:1}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.brand-icon{width:52px;height:52px}
+.brand-text{display:flex;flex-direction:column}
+.brand-name{font-size:22px;font-weight:600;color:var(--text);letter-spacing:-0.5px}
+.brand-sub{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace}
+.login-divider{width:100%;height:1px;background:var(--border);margin:4px 0}
+.login-label{width:100%;font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:-10px}
+.login-input{width:100%;padding:10px 14px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:14px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none;transition:border-color 0.15s}
+.login-input:focus{border-color:var(--green);background:var(--card)}
+.btn-login{width:100%;padding:12px;border-radius:var(--radius-sm);background:var(--green);border:none;color:white;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:0.2px;transition:background 0.15s}
+.btn-login:hover{background:var(--green-hover)}
+.err-box{width:100%;padding:9px 12px;background:var(--red-bg);color:var(--red);border-radius:var(--radius-sm);font-size:13px;text-align:center;display:none;border:1px solid var(--red-border)}
+.link-sm{font-size:12px;color:var(--green);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif}
+.link-sm:hover{text-decoration:underline}
+
+/* ===================== ADMIN ===================== */
+.admin-page{flex-direction:column;background:var(--bg);padding:1.5rem;gap:1.25rem;min-height:100vh}
+.admin-topbar{display:flex;justify-content:space-between;align-items:center;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.admin-topbar h1{font-size:18px;font-weight:600;color:var(--text)}
+.admin-topbar-right{display:flex;align-items:center;gap:8px}
+.pill{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500;background:var(--green-light);color:var(--green-dark)}
+.btn-sm{padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;border:1px solid var(--border2);background:var(--card);color:var(--text2);transition:all 0.15s}
+.btn-sm:hover{background:var(--bg)}
+.metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;display:flex;flex-direction:column;gap:4px}
+.metric-card .num{font-size:28px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace}
+.metric-card .lbl{font-size:12px;color:var(--text3)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.panel-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem}
+.panel-card h3{font-size:13px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:1rem;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.user-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.user-row:last-child{border-bottom:none}
+.u-avatar{width:32px;height:32px;border-radius:50%;background:var(--green-light);color:var(--green-dark);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.u-info{flex:1;min-width:0}
+.u-name{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.u-login{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;flex-shrink:0}
+.badge-on{background:var(--green-light);color:var(--green-dark)}
+.badge-off{background:#F1EFE8;color:var(--text3)}
+.u-actions{display:flex;gap:4px;flex-shrink:0}
+.ico-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.ico-btn:hover{background:var(--bg)}
+.ico-btn.del:hover{background:var(--red-bg);border-color:var(--red-border)}
+.ico-btn svg{width:13px;height:13px;stroke:var(--text2);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.form-col{display:flex;flex-direction:column;gap:10px}
+.f-group{display:flex;flex-direction:column;gap:4px}
+.f-group label{font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px}
+.f-group input{padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none;transition:border-color 0.15s}
+.f-group input:focus{border-color:var(--green);background:var(--card)}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer}
+.checkbox-row input[type=checkbox]{accent-color:var(--green);width:14px;height:14px}
+.btn-add{padding:10px;border-radius:var(--radius-sm);background:var(--green);border:none;color:white;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s;margin-top:4px}
+.btn-add:hover{background:var(--green-hover)}
+.err-inline{font-size:12px;color:var(--red);background:var(--red-bg);padding:7px 10px;border-radius:var(--radius-sm);display:none;border:1px solid var(--red-border)}
+.log-line{font-size:12px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border);font-family:'DM Mono',monospace}
+.log-line:last-child{border-bottom:none}
+.log-line b{color:var(--text);font-family:'DM Sans',sans-serif}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:white;padding:11px 18px;border-radius:var(--radius-sm);font-size:13px;font-weight:500;opacity:0;transition:opacity 0.25s,transform 0.25s;transform:translateY(8px);pointer-events:none;z-index:9999}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* ===================== CHAT ===================== */
+.chat-page{flex-direction:column;height:100vh;background:var(--bg)}
+.chat-wrap{display:flex;flex:1;overflow:hidden;height:calc(100vh - 0px)}
+.sidebar{width:220px;flex-shrink:0;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:20px 14px 14px;gap:12px;overflow-y:auto}
+.avatar-zone{position:relative;width:100px;height:100px}
+.avatar-zone svg{width:100px;height:100px}
+.status-dot{position:absolute;bottom:5px;right:5px;width:12px;height:12px;border-radius:50%;background:var(--text3);border:2px solid var(--card);transition:background 0.3s}
+.status-dot.on{background:var(--green);animation:pulse 1s infinite}
+.status-dot.talk{background:#378ADD;animation:pulse 0.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.35}}
+.clara-nm{font-size:15px;font-weight:600;color:var(--text);letter-spacing:-0.3px}
+.greet-txt{font-size:11px;color:var(--text3);text-align:center;line-height:1.4}
+.state-txt{font-size:11px;color:var(--text3);text-align:center;min-height:14px}
+.mic-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--border2);background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s;box-shadow:var(--shadow)}
+.mic-btn:hover{background:var(--bg)}
+.mic-btn.on{background:var(--green-light);border-color:var(--green)}
+.mic-btn svg{width:20px;height:20px;stroke:var(--text2);fill:none;stroke-width:1.5;stroke-linecap:round}
+.mic-hint{font-size:10px;color:var(--text3);text-align:center}
+.qs-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.7px;align-self:flex-start;margin-top:4px}
+.qs-list{width:100%;display:flex;flex-direction:column;gap:4px}
+.qs-btn{font-size:11px;padding:6px 8px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--card);cursor:pointer;color:var(--text2);text-align:left;line-height:1.35;transition:all 0.15s;font-family:'DM Sans',sans-serif}
+.qs-btn:hover{border-color:var(--green);color:var(--green-dark);background:var(--green-light)}
+.logout-lnk{font-size:11px;color:var(--text3);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif;padding:4px 8px;border-radius:6px;margin-top:auto;transition:all 0.15s}
+.logout-lnk:hover{background:var(--bg);color:var(--text2)}
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chat-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--card)}
+.chat-header-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.chat-header-title{font-size:14px;font-weight:600;color:var(--text)}
+.chat-header-sub{font-size:12px;color:var(--text3);margin-left:auto;font-family:'DM Mono',monospace}
+.messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
+.msg{display:flex;gap:8px;align-items:flex-start;animation:pop 0.25s ease}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.user{flex-direction:row-reverse}
+.bubble{max-width:82%;padding:10px 14px;font-size:13px;line-height:1.65;color:var(--text)}
+.msg.clara .bubble{background:var(--card);border:1px solid var(--border);border-radius:4px 14px 14px 14px;box-shadow:var(--shadow)}
+.msg.user .bubble{background:var(--green);color:white;border-radius:14px 4px 14px 14px}
+.steps{margin-top:8px;display:flex;flex-direction:column;gap:5px}
+.step-r{display:flex;gap:7px;align-items:flex-start}
+.step-n{width:18px;height:18px;border-radius:50%;background:var(--green-mid);color:var(--green-dark);font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-family:'DM Mono',monospace}
+.step-tx{font-size:12px;color:var(--text2);line-height:1.55}
+.step-tx b{color:var(--text);font-weight:500}
+.warn-box{font-size:11px;background:var(--amber);color:var(--amber-dark);padding:6px 10px;border-radius:6px;margin-top:6px;border-left:2px solid var(--amber-border)}
+.av-xs{width:24px;height:24px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;font-weight:600;color:var(--green-dark)}
+.chat-footer{padding:12px 16px;border-top:1px solid var(--border);display:flex;gap:8px;background:var(--card)}
+.chat-input{flex:1;padding:10px 14px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none;transition:border-color 0.15s}
+.chat-input:focus{border-color:var(--green);background:var(--card)}
+.send-btn{padding:10px 16px;border-radius:var(--radius-sm);background:var(--green);border:none;color:white;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background 0.15s}
+.send-btn:hover{background:var(--green-hover)}
+.wave-bars{display:flex;gap:2px;align-items:center;height:14px}
+.w-bar{width:3px;border-radius:2px;background:var(--green);animation:wv 0.8s infinite}
+.w-bar:nth-child(1){animation-delay:0s;height:4px}.w-bar:nth-child(2){animation-delay:.1s;height:12px}.w-bar:nth-child(3){animation-delay:.2s;height:8px}.w-bar:nth-child(4){animation-delay:.3s;height:14px}.w-bar:nth-child(5){animation-delay:.4s;height:6px}
+@keyframes wv{0%,100%{transform:scaleY(1)}50%{transform:scaleY(0.3)}}
+.typing-dots{display:flex;gap:3px;align-items:center}
+.d{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:bk 1.2s infinite}
+.d:nth-child(2){animation-delay:.2s}.d:nth-child(3){animation-delay:.4s}
+@keyframes bk{0%,80%,100%{transform:scale(1)}40%{transform:scale(1.5)}}
+
+/* DEPT BADGE */
+.dept-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:var(--blue-bg);color:var(--blue);font-weight:500;font-family:'DM Mono',monospace}
+
+@media(max-width:640px){
+  .sidebar{width:180px;padding:14px 10px}
+  .two-col{grid-template-columns:1fr}
+  .metrics-row{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- LOGIN -->
+<div id="s-login" class="screen active login-page">
+  <div class="login-card">
+    <div class="brand">
+      <svg class="brand-icon" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="26" cy="26" r="25" fill="#E1F5EE" stroke="#9FE1CB" stroke-width="1"/>
+        <ellipse cx="26" cy="23" rx="11" ry="12" fill="#FAEEDA"/>
+        <ellipse cx="21.5" cy="20.5" rx="2" ry="2.5" fill="white"/>
+        <ellipse cx="30.5" cy="20.5" rx="2" ry="2.5" fill="white"/>
+        <circle cx="21.5" cy="21" r="1.3" fill="#085041"/>
+        <circle cx="30.5" cy="21" r="1.3" fill="#085041"/>
+        <path d="M23 27.5 Q26 30.5 29 27.5" stroke="#D85A30" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+        <path d="M16 17 Q14 9 20 7 Q26 5 32 7 Q38 9 36 17" fill="#1D9E75"/>
+        <path d="M14 36 Q12 40 14 46 Q16 50 26 51 Q36 50 38 46 Q40 40 38 36" fill="#1D9E75"/>
+        <ellipse cx="13" cy="29" rx="4.5" ry="8" fill="#FAEEDA" transform="rotate(-8,13,29)"/>
+        <ellipse cx="39" cy="29" rx="4.5" ry="8" fill="#FAEEDA" transform="rotate(8,39,29)"/>
+        <rect x="21" y="33" width="10" height="3" rx="1.5" fill="#0F6E56"/>
+      </svg>
+      <div class="brand-text">
+        <div class="brand-name">CLARA</div>
+        <div class="brand-sub">Clara Associados</div>
+      </div>
+    </div>
+    <div class="login-divider"></div>
+    <p style="font-size:13px;color:var(--text3);text-align:center">Assistente de treinamento fiscal.<br>Faça login para continuar.</p>
+    <div id="login-err" class="err-box">Usuário ou senha incorretos.</div>
+    <div class="login-label">Usuário</div>
+    <input class="login-input" type="text" id="li-user" placeholder="seu.usuario" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="login-label">Senha</div>
+    <input class="login-input" type="password" id="li-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="btn-login" onclick="doLogin()">Entrar</button>
+    <button class="link-sm" onclick="showScreen('s-adminlogin')">Acesso administrador</button>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="s-adminlogin" class="screen login-page">
+  <div class="login-card">
+    <div style="font-size:32px;margin-bottom:4px">⚙</div>
+    <div class="brand-name">Administrador</div>
+    <p style="font-size:13px;color:var(--text3);text-align:center">Acesso restrito</p>
+    <div id="adm-err" class="err-box">Senha incorreta.</div>
+    <div class="login-label">Senha master</div>
+    <input class="login-input" type="password" id="adm-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
+    <button class="btn-login" onclick="doAdminLogin()">Acessar painel</button>
+    <button class="link-sm" onclick="showScreen('s-login')">Voltar</button>
+  </div>
+</div>
+
+<!-- ADMIN PAINEL -->
+<div id="s-admin" class="screen admin-page">
+  <div class="admin-topbar">
+    <h1>Painel do administrador</h1>
+    <div class="admin-topbar-right">
+      <span class="pill">CLARA · Piloto Fiscal</span>
+      <button class="btn-sm" onclick="logout()">Sair</button>
+    </div>
+  </div>
+  <div class="metrics-row">
+    <div class="metric-card"><div class="num" id="m-total">0</div><div class="lbl">Colaboradores</div></div>
+    <div class="metric-card"><div class="num" id="m-active">0</div><div class="lbl">Ativos</div></div>
+    <div class="metric-card"><div class="num" id="m-hoje">0</div><div class="lbl">Acessos hoje</div></div>
+  </div>
+  <div class="two-col">
+    <div class="panel-card">
+      <h3>Colaboradores</h3>
+      <div id="user-list"><div style="font-size:13px;color:var(--text3)">Carregando...</div></div>
+    </div>
+    <div class="panel-card">
+      <h3>Adicionar colaborador</h3>
+      <div class="form-col">
+        <div class="f-group"><label>Nome completo</label><input type="text" id="n-name" placeholder="Ana Silva"/></div>
+        <div class="f-group"><label>Usuário (login)</label><input type="text" id="n-user" placeholder="ana.silva"/></div>
+        <div class="f-group"><label>Senha inicial</label><input type="password" id="n-pass" placeholder="Mínimo 6 caracteres"/></div>
+        <div class="f-group"><label>Departamento</label>
+          <select id="n-dept" style="padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:13px;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);outline:none">
+            <option value="fiscal">Fiscal (piloto)</option>
+            <option value="contabil">Contábil</option>
+            <option value="dp">Departamento Pessoal</option>
+            <option value="societario">Societário</option>
+            <option value="financeiro">Financeiro</option>
+          </select>
+        </div>
+        <label class="checkbox-row"><input type="checkbox" id="n-adm"> Acesso de administrador</label>
+        <div id="add-err" class="err-inline">Preencha todos os campos.</div>
+        <button class="btn-add" onclick="addUser()">Adicionar colaborador</button>
+      </div>
+    </div>
+  </div>
+  <div class="panel-card">
+    <h3>Últimos acessos</h3>
+    <div id="access-log"><div style="font-size:12px;color:var(--text3)">Nenhum acesso ainda.</div></div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div id="s-chat" class="screen chat-page">
+  <div class="chat-wrap">
+    <div class="sidebar">
+      <div class="avatar-zone">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" id="av-svg">
+          <circle cx="50" cy="50" r="48" fill="#E1F5EE" stroke="#9FE1CB" stroke-width="1"/>
+          <ellipse cx="50" cy="44" rx="20" ry="22" fill="#FAEEDA"/>
+          <ellipse cx="43" cy="41" rx="3.2" ry="3.6" fill="white"/>
+          <ellipse cx="57" cy="41" rx="3.2" ry="3.6" fill="white"/>
+          <circle cx="43" cy="42" r="2" fill="#085041" id="eye-l"/>
+          <circle cx="57" cy="42" r="2" fill="#085041" id="eye-r"/>
+          <circle cx="43.6" cy="41.5" r="0.65" fill="white"/>
+          <circle cx="57.6" cy="41.5" r="0.65" fill="white"/>
+          <path d="M44 52 Q50 57 56 52" stroke="#D85A30" stroke-width="1.5" fill="none" stroke-linecap="round" id="mouth"/>
+          <ellipse cx="40" cy="50" rx="3.2" ry="1.8" fill="#F0997B" opacity="0.5"/>
+          <ellipse cx="60" cy="50" rx="3.2" ry="1.8" fill="#F0997B" opacity="0.5"/>
+          <path d="M31 34 Q29 21 38 17 Q50 12 62 17 Q71 21 69 34" fill="#5DCAA5"/>
+          <path d="M31 34 Q29 30 30 26 Q34 18 40 16 Q50 12 60 16 Q66 18 70 26 Q71 30 69 34" fill="#1D9E75"/>
+          <rect x="38" y="66" width="24" height="4.5" rx="2.2" fill="#5DCAA5"/>
+          <path d="M25 70 Q22 75 24 82 Q26 89 38 91 Q50 93 62 91 Q74 89 76 82 Q78 75 75 70" fill="#1D9E75"/>
+          <ellipse cx="30" cy="61" rx="5.5" ry="9" fill="#FAC775" transform="rotate(-10,30,61)"/>
+          <ellipse cx="70" cy="61" rx="5.5" ry="9" fill="#FAC775" transform="rotate(10,70,61)"/>
+          <rect x="44" y="61" width="12" height="3.5" rx="1.7" fill="#0F6E56"/>
+        </svg>
+        <div class="status-dot" id="status-dot"></div>
+      </div>
+      <div class="clara-nm">CLARA</div>
+      <div class="greet-txt" id="greet-txt">Olá!</div>
+      <div class="state-txt" id="state-txt">Pronta para ajudar</div>
+      <button class="mic-btn" id="mic-btn" onclick="toggleMic()" title="Falar com a CLARA">
+        <svg viewBox="0 0 24 24"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><line x1="12" y1="17" x2="12" y2="21"/><line x1="8" y1="21" x2="16" y2="21"/></svg>
+      </button>
+      <div class="mic-hint" id="mic-hint">Clique para falar</div>
+      <div class="qs-label">Atalhos</div>
+      <div class="qs-list">
+        <button class="qs-btn" onclick="askQ('Como lanço NF-e de entrada?')">Como lanço NF-e de entrada?</button>
+        <button class="qs-btn" onclick="askQ('Como apuro o Simples Nacional?')">Como apuro o Simples Nacional?</button>
+        <button class="qs-btn" onclick="askQ('Como transmito o SPED EFD ICMS?')">Como transmito o SPED ICMS?</button>
+        <button class="qs-btn" onclick="askQ('Como encerro o GissOnline?')">Como encerro o GissOnline?</button>
+        <button class="qs-btn" onclick="askQ('Como cadastro certificado A1 no Hub-Sieg?')">Como cadastro o cert. A1?</button>
+        <button class="qs-btn" onclick="askQ('Como faço parcelamento de ICMS?')">Como parcelo ICMS?</button>
+      </div>
+      <button class="logout-lnk" onclick="logout()">Sair</button>
+    </div>
+    <div class="chat-main">
+      <div class="chat-header">
+        <div class="chat-header-dot"></div>
+        <div class="chat-header-title">Assistente fiscal</div>
+        <div class="chat-header-sub" id="dept-label">Fiscal · Piloto</div>
+      </div>
+      <div class="messages" id="messages"></div>
+      <div class="chat-footer">
+        <input class="chat-input" type="text" id="c-input" placeholder="Digite sua dúvida sobre procedimentos fiscais..." onkeydown="if(event.key==='Enter')sendMsg()"/>
+        <button class="send-btn" onclick="sendMsg()">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PASS = 'clara@admin2025';
+const SK_USERS = 'clara_v1_users';
+const SK_LOG = 'clara_v1_log';
+
+const PROMPT = `Você é a CLARA, assistente virtual de treinamento do setor fiscal da Clara Associados. Ensine colaboradores novatos passo a passo, de forma clara e encorajadora.
+
+ITFI 7.5.2.01 - LANÇAMENTO FISCAL:
+Software: Domínio Sistemas - Escrita Fiscal. XML via Hub-Sieg.
+NFS-e Prestados: Domínio > Docs Fiscais > Importar NFS-e Prestado > Todos > Gravar. Conferir GissOnline (diamdu/47414). ENCERRAR GISSONLINE SEMPRE, mesmo sem notas.
+NFS-e Tomados: GissOnline > Tomador > Validar > Imprimir. Lançar MANUAL: Movimentos>Entradas>Novo>Espécie 39>Série E. CFOP 1933 (dentro SP) ou 2933 (fora SP). Verificar retenções PIS/COFINS/IR/INSS/CSLL/ISS. Parcela: 1x, vence 1 dia após emissão.
+NF-e Entrada: Hub-Sieg ou Cofre SIEG (andreia-fiscal@claraassociados.com/123456) > XML > Domínio Importação > Espécie 36.
+NF-e Saída: Hub-Sieg ou Onvio > Espécie 36. Notas puladas: SEFAZ-SP > Inutilização.
+CF-e SAT: Espécie 46. NFC-e: Espécie 42. Cancelados: importar sem valor.
+CT-e: Cofre SIEG > CT-e > Espécie 38. Exportar Excel para conferência.
+REGRA: Conferir sempre sequência de números, valores e totais entre importação e relatório.
+
+ITFI 7.5.2.02 - APURAÇÃO:
+IPI: Cód.2, DARF 5123, vence dia 25. Débito - Crédito.
+PIS Cum: Cód.4, DARF 8109, 0,65%. PIS N-Cum: Cód.17, DARF 6912, 1,65%.
+COFINS Cum: Cód.5, DARF 2172, 3%. COFINS N-Cum: Cód.19, DARF 5856, 7,60%.
+IRPJ LP: Cód.7, DARF 2089, TRIMESTRAL. Ind/Com 1,20%, Serviços 4,80%.
+CSLL LP: Cód.7, DARF 2372, TRIMESTRAL. Ind/Com 1,08%, Serviços 2,88%.
+Simples: Cód.44, cert. Clara, vence dia 20.
+ICMS: Cód.1 GARE 046-2. Dif.Alíq: Cód.8 GARE 063-2. ST: Cód.31. Antecip: Cód.27.
+
+ITFI 7.5.2.03 - OBRIGAÇÕES:
+GIA: Domínio>Informativos>Estaduais>Nova GIA>C:\GIASP\. Programa GIA>Importar>Consistir>Gerar>Enviar. Login: dadid/3v44a6a567.
+SPED ICMS/IPI: Domínio>SPED Fiscal>C:\Sped ICMS IPI\. Programa>Nova>Importar>Assinar(cert.Clara)>Transmitir. Recibo: Onvio/SPED FISCAL.
+DeSTDA: Domínio>DeSTDA>Desktop. Programa SEDIF>Importar>Encerrar>Gerar>Transmitir. Login: dadid/3v44a6a567.
+GissOnline: Prestador>Encerrar. Tomador>Encerrar Sem Movimento.
+SPED Contrib: Domínio>EFD Contrib>C:\SPED CONTRI\. Programa>Nova>Importar>Assinar>Transmitir. Recibo: Onvio/SPED CONT.
+DCTF: Domínio>DCTF>C:\DCTF\. Programa>Importar>Verificar>Transmitir cert.>Recibo: Onvio/DCTF.
+EFD-Reinf: Domínio>EFD-Reinf>Enviar>Entrega Completa>Enviar>aguardar 5min>Relatório>Onvio/EFD REINF.
+
+ITFI 7.5.2.04 - LIVROS (anual):
+Relatórios>Livros>Livros Fiscais>Emitir>01/01 a 31/12>PDF>\\CLARAASSOCIADOS\OneDrive\BACKUP DOCUMENTOS\DEPARTAMENTO FISCAL\[cliente].
+Tipos: Entradas, Saídas, Serv.Tomados, Serv.Prestados, ICMS, IPI, Inventário.
+
+ITFI 7.5.2.05 - ROTINAS:
+Hub-Sieg: hub.sieg.com>Adicionar cert.>Senha nas Observações do Domínio>CNPJ>UF>90 dias>NF-e/CT-e/SAT>Cadastrar. Cert.A1 válido 1 ano.
+NF-e: consultar CNPJ(Receita), Sintegra(ICMS), LegisWeb/NCM(sub11937/123456). CSOSN: 101=trib,500=ST. CST: 00=trib,60=ST,20=red.BC.
+NFS-e: franca.ginfes.com.br>Acesso Prestador>Emitir>CNPJ tomador>Local>Atividade>Alíquota>Valor.
+Parcel.ICMS: portal.fazenda.sp.gov.br/pfe>dadid/3v44a6a567>Conta Fiscal>Parcelamento. Min R$500, max 60x.
+Parcel.Simples: e-CAC>Gov.BR>cert.Clara>Simples Nacional>Parcelamento.
+Parcel.Federais: e-CAC>Dívida Ativa>Simplificado>Cód.002. Min R$300, max 60x.
+Gestta: app.gestta.com.br>Tarefas>Cliente>Competência>Concluir/Desconsiderar.
+Onvio envio: Documentos>Cliente>Pasta Fiscal. Recebimento: Portal do Cliente>Solicitações>Geral.
+
+REGRAS: Português, amigável, passos numerados, ATENÇÃO: para alertas, códigos e caminhos completos.`;
+
+const DB = {
+  async getUsers(){
+    try{
+      const raw=localStorage.getItem(SK_USERS);
+      if(raw){const u=JSON.parse(raw);if(Array.isArray(u)&&u.length)return u;}
+    }catch(e){}
+    const def=[
+      {username:'admin',name:'Administrador',password:'clara@admin2025',role:'admin',dept:'fiscal',active:true},
+      {username:'colaborador',name:'Colaborador Exemplo',password:'clara123',role:'user',dept:'fiscal',active:true}
+    ];
+    await this.saveUsers(def);return def;
+  },
+  async saveUsers(u){try{localStorage.setItem(SK_USERS,JSON.stringify(u));}catch(e){}},
+  async getLog(){try{const raw=localStorage.getItem(SK_LOG);if(raw)return JSON.parse(raw);}catch(e){}return[];},
+  async addLog(e){const l=await this.getLog();l.unshift(e);try{localStorage.setItem(SK_LOG,JSON.stringify(l.slice(0,50)));}catch(ex){}}
+};
+
+let cu=null,hist=[],recog=null,micOn=false,speaking=false,utter=null,blinkT=null;
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+async function doLogin(){
+  const u=document.getElementById('li-user').value.trim();
+  const p=document.getElementById('li-pass').value;
+  const err=document.getElementById('login-err');
+  err.style.display='none';
+  if(!u||!p){err.textContent='Preencha usuário e senha.';err.style.display='block';return;}
+  const users=await DB.getUsers();
+  const found=users.find(x=>x.username===u&&x.password===p&&x.active);
+  if(!found){err.textContent='Usuário ou senha incorretos.';err.style.display='block';return;}
+  cu=found;
+  await DB.addLog({user:found.name,username:found.username,time:new Date().toLocaleString('pt-BR'),action:'Login'});
+  if(found.role==='admin'){await loadAdmin();showScreen('s-admin');}
+  else{initChat();showScreen('s-chat');}
+}
+
+async function doAdminLogin(){
+  const p=document.getElementById('adm-pass').value;
+  document.getElementById('adm-err').style.display='none';
+  if(p!==ADMIN_PASS){document.getElementById('adm-err').style.display='block';return;}
+  const users=await DB.getUsers();
+  cu=users.find(x=>x.role==='admin')||{name:'Administrador',username:'admin',role:'admin'};
+  await loadAdmin();showScreen('s-admin');
+}
+
+async function loadAdmin(){
+  const users=await DB.getUsers();
+  const log=await DB.getLog();
+  const nonAdm=users.filter(u=>u.role!=='admin');
+  document.getElementById('m-total').textContent=nonAdm.length;
+  document.getElementById('m-active').textContent=nonAdm.filter(u=>u.active).length;
+  const td=new Date().toLocaleDateString('pt-BR');
+  document.getElementById('m-hoje').textContent=log.filter(l=>l.time&&l.time.startsWith(td)).length;
+  const list=document.getElementById('user-list');
+  if(!nonAdm.length){list.innerHTML='<div style="font-size:13px;color:var(--text3)">Nenhum colaborador ainda.</div>';}
+  else{
+    list.innerHTML=nonAdm.map(u=>`<div class="user-row">
+      <div class="u-avatar">${u.name.split(' ').map(n=>n[0]).slice(0,2).join('')}</div>
+      <div class="u-info"><div class="u-name">${u.name}</div><div class="u-login">@${u.username} · ${u.dept||'fiscal'}</div></div>
+      <span class="badge ${u.active?'badge-on':'badge-off'}">${u.active?'ativo':'inativo'}</span>
+      <div class="u-actions">
+        <button class="ico-btn" onclick="toggleUser('${u.username}')" title="${u.active?'Desativar':'Ativar'}">
+          <svg viewBox="0 0 24 24"><path d="${u.active?'M18.36 6.64A9 9 0 0 1 20 12a9 9 0 0 1-9 9 9 9 0 0 1-5.36-1.64M2 12A9 9 0 0 1 12 3':'M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0z'}"/></svg>
+        </button>
+        <button class="ico-btn" onclick="resetPass('${u.username}')" title="Redefinir senha">
+          <svg viewBox="0 0 24 24"><path d="M15 7a2 2 0 0 1 2 2m4-4-2 2-2-2m0 0a4 4 0 0 0-8 0v4H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-4V9z"/></svg>
+        </button>
+        <button class="ico-btn del" onclick="delUser('${u.username}')" title="Remover">
+          <svg viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v3M4 7h16"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+  }
+  const logEl=document.getElementById('access-log');
+  logEl.innerHTML=log.length?log.slice(0,12).map(l=>`<div class="log-line"><b>${l.user||l.name}</b> (@${l.username}) — ${l.action} em ${l.time}</div>`).join(''):'<div style="font-size:12px;color:var(--text3)">Nenhum acesso.</div>';
+}
+
+async function addUser(){
+  const name=document.getElementById('n-name').value.trim();
+  const uname=document.getElementById('n-user').value.trim();
+  const pass=document.getElementById('n-pass').value;
+  const dept=document.getElementById('n-dept').value;
+  const isAdm=document.getElementById('n-adm').checked;
+  const err=document.getElementById('add-err');
+  err.style.display='none';
+  if(!name||!uname||!pass){err.textContent='Preencha todos os campos.';err.style.display='block';return;}
+  if(pass.length<6){err.textContent='Senha mínima: 6 caracteres.';err.style.display='block';return;}
+  const users=await DB.getUsers();
+  if(users.find(u=>u.username===uname)){err.textContent='Este usuário já existe.';err.style.display='block';return;}
+  users.push({username:uname,name,password:pass,role:isAdm?'admin':'user',dept,active:true,created:new Date().toISOString()});
+  await DB.saveUsers(users);
+  document.getElementById('n-name').value='';
+  document.getElementById('n-user').value='';
+  document.getElementById('n-pass').value='';
+  document.getElementById('n-adm').checked=false;
+  toast('Colaborador adicionado!');
+  await loadAdmin();
+}
+
+async function toggleUser(uname){
+  const users=await DB.getUsers();
+  const u=users.find(x=>x.username===uname);
+  if(u){u.active=!u.active;await DB.saveUsers(users);await loadAdmin();toast(u.active?'Usuário ativado.':'Usuário desativado.');}
+}
+
+async function delUser(uname){
+  if(!confirm('Remover @'+uname+'?'))return;
+  let users=await DB.getUsers();
+  users=users.filter(u=>u.username!==uname);
+  await DB.saveUsers(users);
+  await loadAdmin();toast('Colaborador removido.');
+}
+
+async function resetPass(uname){
+  const nova=prompt('Nova senha para @'+uname+' (mín. 6 caracteres):');
+  if(!nova||nova.length<6){if(nova!==null)alert('Senha muito curta.');return;}
+  const users=await DB.getUsers();
+  const u=users.find(x=>x.username===uname);
+  if(u){u.password=nova;await DB.saveUsers(users);toast('Senha redefinida!');}
+}
+
+function logout(){
+  cu=null;hist=[];
+  if(speaking)speechSynthesis.cancel();
+  stopMic();
+  showScreen('s-login');
+  document.getElementById('li-user').value='';
+  document.getElementById('li-pass').value='';
+}
+
+function initChat(){
+  hist=[];
+  document.getElementById('messages').innerHTML='';
+  document.getElementById('greet-txt').textContent='Olá, '+cu.name.split(' ')[0]+'!';
+  const dept=cu.dept||'fiscal';
+  document.getElementById('dept-label').textContent=dept.charAt(0).toUpperCase()+dept.slice(1)+' · Piloto';
+  addMsg('clara','Olá, <b>'+cu.name.split(' ')[0]+'</b>! Sou a CLARA, sua assistente de treinamento fiscal. Pode me perguntar qualquer coisa sobre os nossos procedimentos — lançamento de notas, apuração, obrigações acessórias ou rotinas auxiliares. Use o microfone ou escreva abaixo!',[],null);
+  startBlink();
+}
+
+function startBlink(){
+  if(blinkT)clearInterval(blinkT);
+  blinkT=setInterval(()=>{
+    const l=document.getElementById('eye-l'),r=document.getElementById('eye-r');
+    if(!l||!r)return;
+    l.setAttribute('ry','0.4');r.setAttribute('ry','0.4');
+    setTimeout(()=>{if(l&&r){l.setAttribute('ry','2');r.setAttribute('ry','2');}},120);
+  },3500+Math.random()*2500);
+}
+
+function setAvatarState(s){
+  const dot=document.getElementById('status-dot');
+  const lbl=document.getElementById('state-txt');
+  const mouth=document.getElementById('mouth');
+  if(!dot)return;
+  dot.className='status-dot';
+  if(s==='listen'){dot.classList.add('on');lbl.innerHTML='<div class="wave-bars"><div class="w-bar"></div><div class="w-bar"></div><div class="w-bar"></div><div class="w-bar"></div><div class="w-bar"></div></div>';}
+  else if(s==='think'){lbl.innerHTML='<div class="typing-dots"><div class="d"></div><div class="d"></div><div class="d"></div></div>';if(mouth)mouth.setAttribute('d','M46 54 Q50 54 54 54');}
+  else if(s==='speak'){dot.classList.add('talk');lbl.textContent='Explicando...';if(mouth)mouth.setAttribute('d','M43 52 Q50 59 57 52');}
+  else{lbl.textContent='Pronta para ajudar';if(mouth)mouth.setAttribute('d','M44 52 Q50 57 56 52');}
+}
+
+function addMsg(role,content,steps,warn){
+  const area=document.getElementById('messages');
+  if(!area)return;
+  const div=document.createElement('div');
+  div.className='msg '+role;
+  let html='';
+  if(role==='clara'){
+    html=`<div class="av-xs">C</div><div class="bubble">${content}`;
+    if(steps&&steps.length){
+      html+='<div class="steps">';
+      steps.forEach((s,i)=>{html+=`<div class="step-r"><div class="step-n">${i+1}</div><div class="step-tx">${s}</div></div>`;});
+      html+='</div>';
+    }
+    if(warn)html+=`<div class="warn-box">Atenção: ${warn}</div>`;
+    html+='</div>';
+  }else{html=`<div class="bubble">${content}</div>`;}
+  div.innerHTML=html;
+  area.appendChild(div);
+  area.scrollTop=area.scrollHeight;
+}
+
+function speak(text){
+  if(!window.speechSynthesis)return;
+  if(utter)speechSynthesis.cancel();
+  const plain=text.replace(/<[^>]+>/g,'').substring(0,600);
+  const u=new SpeechSynthesisUtterance(plain);
+  u.lang='pt-BR';u.rate=0.95;u.pitch=1.1;
+  const vs=speechSynthesis.getVoices();
+  const v=vs.find(x=>x.lang==='pt-BR')||vs.find(x=>x.lang.startsWith('pt'));
+  if(v)u.voice=v;
+  u.onstart=()=>{speaking=true;setAvatarState('speak');};
+  u.onend=()=>{speaking=false;setAvatarState('idle');};
+  u.onerror=()=>{speaking=false;setAvatarState('idle');};
+  utter=u;speechSynthesis.speak(u);
+}
+
+async function callAPI(msg){
+  hist.push({role:'user',content:msg});
+  setAvatarState('think');
+  try{
+    const res=await fetch('/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:PROMPT,messages:hist.slice(-10)})
+    });
+    if(!res.ok){
+      const errText=await res.text();
+      console.error('Erro HTTP',res.status,errText);
+      addMsg('clara','Erro '+res.status+'. Tente novamente.',null,null);
+      setAvatarState('idle');return;
+    }
+    const data=await res.json();
+    if(data.error||!data.content){const errMsg=data.error?(typeof data.error==='object'?JSON.stringify(data.error):data.error):'Sem resposta';addMsg('clara','Erro API: '+errMsg,null,null);setAvatarState('idle');return;}
+    const reply=data.content&&data.content[0]?data.content[0].text:'Desculpe, não consegui processar agora.';
+    hist.push({role:'assistant',content:reply});
+    const f=fmtReply(reply);
+    addMsg('clara',f.intro,f.steps,f.warn);
+    speak(reply);
+  }catch(e){console.error('Fetch error:',e);addMsg('clara','Erro: '+e.message,null,null);setAvatarState('idle');}
+}
+
+function fmtReply(text){
+  const lines=text.split('\n').filter(l=>l.trim());
+  let intro='',steps=[],warn='',inS=false;
+  lines.forEach(l=>{
+    const t=l.trim();
+    if(/^atenção[:\s]/i.test(t)||/^⚠/.test(t)){warn=t.replace(/^atenção[:\s]*/i,'').replace(/^⚠\s*/,'');}
+    else if(/^\d+[\.\)]\s/.test(t)||/^[-•]\s/.test(t)){
+      inS=true;
+      const c=t.replace(/^\d+[\.\)]\s/,'').replace(/^[-•]\s/,'');
+      steps.push(c.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<b>$1</b>'));
+    }else if(!inS){const b=t.replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');intro+=(intro?' '+b:b);}
+  });
+  if(!intro&&steps.length)intro='Aqui está o passo a passo:';
+  return{intro,steps,warn};
+}
+
+function sendMsg(){
+  const inp=document.getElementById('c-input');
+  const msg=inp.value.trim();
+  if(!msg)return;
+  inp.value='';
+  addMsg('user',msg);
+  callAPI(msg);
+}
+
+function askQ(q){addMsg('user',q);callAPI(q);}
+
+function toggleMic(){
+  if(micOn){stopMic();return;}
+  if(!window.SpeechRecognition&&!window.webkitSpeechRecognition){
+    addMsg('clara','Reconhecimento de voz disponível no Chrome e Edge.',null,null);return;
+  }
+  if(speaking)speechSynthesis.cancel();
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recog=new SR();recog.lang='pt-BR';recog.interimResults=false;recog.maxAlternatives=1;
+  recog.onstart=()=>{micOn=true;document.getElementById('mic-btn').classList.add('on');document.getElementById('mic-hint').textContent='Ouvindo...';setAvatarState('listen');};
+  recog.onresult=(e)=>{const t=e.results[0][0].transcript;stopMic();addMsg('user',t);callAPI(t);};
+  recog.onerror=()=>{stopMic();setAvatarState('idle');};
+  recog.onend=()=>{stopMic();};
+  recog.start();
+}
+
+function stopMic(){
+  micOn=false;if(recog)try{recog.stop();}catch(e){}
+  const b=document.getElementById('mic-btn'),h=document.getElementById('mic-hint');
+  if(b)b.classList.remove('on');if(h)h.textContent='Clique para falar';
+  if(!speaking)setAvatarState('idle');
+}
+
+speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();
+</script>
+</body>
+</html>

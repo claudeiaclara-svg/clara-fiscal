@@ -4,7 +4,12 @@ const path = require("path");
 const app = express();
 app.use(express.json());
 
-// API PRIMEIRO - antes do static
+// Rota de teste
+app.get("/teste", (req, res) => {
+  res.json({ status: "funcionando!" });
+});
+
+// API
 app.post("/.netlify/functions/claude", async (req, res) => {
   try {
     const apiKey = process.env.ANTHROPIC_KEY;
@@ -30,7 +35,7 @@ app.post("/.netlify/functions/claude", async (req, res) => {
   }
 });
 
-// STATIC depois da API
+// STATIC
 app.use(express.static(__dirname));
 
 app.get("*", (req, res) => {

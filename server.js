@@ -3,9 +3,8 @@ const path = require("path");
 
 const app = express();
 app.use(express.json());
-app.use(express.static(__dirname));
 
-// Compatível com a URL que o index.html já usa
+// API PRIMEIRO - antes do static
 app.post("/.netlify/functions/claude", async (req, res) => {
   try {
     const apiKey = process.env.ANTHROPIC_KEY;
@@ -31,7 +30,9 @@ app.post("/.netlify/functions/claude", async (req, res) => {
   }
 });
 
-// Todas as outras rotas servem o index.html
+// STATIC depois da API
+app.use(express.static(__dirname));
+
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
